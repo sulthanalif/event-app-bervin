@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
             'manage-permissions',
             'manage-roles',
             'manage-logs',
+
+            'manage-dealers',
+            'manage-products',
         ];
 
         foreach ($permissions as $permission) {
@@ -34,8 +37,9 @@ class DatabaseSeeder extends Seeder
         $roleSuperAdmin->givePermissionTo($permissions);
 
         $superAdmin = User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@mail.com',
+            'name' => 'IT BERVIN',
+            'email' => 'it@bervin.co.id',
+            'password' => 'An9gr3k!!',
         ]);
 
         $superAdmin->assignRole($roleSuperAdmin);

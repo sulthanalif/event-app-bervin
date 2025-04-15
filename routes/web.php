@@ -17,7 +17,9 @@ Route::group(['middleware' => 'auth'], function () {
 
     Volt::route('/dashboard', 'dashboard')->name('dashboard');
 
-    Volt::route('/users', 'users.index')->name('users');
+    Volt::route('/dealers', 'pages.dealers.index')->name('dealers');
+
+    Volt::route('/users', 'pages.users.index')->name('users');
 
     Volt::route('/roles', 'settings.roles.index')->middleware('can:manage-roles')->name('roles');
 
