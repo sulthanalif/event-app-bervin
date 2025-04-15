@@ -15,11 +15,13 @@ Route::group(['middleware' => 'guest'], function () {
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/logout', LogoutController::class)->name('logout');
 
-    Volt::route('/dashboard', 'dashboard')->name('dashboard');
+    Volt::route('/dashboard', 'dashboard')->middleware('can:dashboard')->name('dashboard');
 
-    Volt::route('/dealers', 'pages.dealers.index')->name('dealers');
+    Volt::route('/dealers', 'pages.dealers.index')->middleware('can:manage-dealers')->name('dealers');
 
-    Volt::route('/users', 'pages.users.index')->name('users');
+    Volt::route('/products', 'pages.products.index')->middleware('can:manage-products')->name('products');
+
+    Volt::route('/users', 'pages.users.index')->middleware('can:manage-users')->name('users');
 
     Volt::route('/roles', 'settings.roles.index')->middleware('can:manage-roles')->name('roles');
 

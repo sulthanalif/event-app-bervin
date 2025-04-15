@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Dealer;
 use Mary\Traits\Toast;
+use App\Models\Product;
 use App\Traits\LogFormatter;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -10,7 +10,7 @@ use Livewire\Attributes\Title;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 new
-#[Title('Dealers')]
+#[Title('Products')]
 class extends Component {
     use Toast, LogFormatter, WithPagination, CreateOrUpdate;
 
@@ -23,64 +23,52 @@ class extends Component {
     public array $sortBy = ['column' => 'created_at', 'direction' => 'desc'];
 
     public string $code = '';
-    public string $name = '';
-    public string $address = '';
-    public string $phone = '';
+    public string $description = '';
     public bool $status = true;
-    public array $varDealer = ['recordId', 'code', 'name', 'address', 'phone', 'status'];
+    public array $varProduct = ['recordId', 'code', 'description', 'status'];
 
-    public function save(): void 
+    public function save(): void
     {
-        $this->setModel(new Dealer());
+        $this->setModel(new Product());
         $this->saveOrUpdate(
             validationRules: [
-                'code' => 'required|string|max:50|unique:dealers',
-                'name' => 'required|string|max:50',
-                'address' => 'nullable|string',
-                'phone' => 'nullable|string',
+                'code' => 'required|string|unique:products,code',
+                'description' => 'required|string',
                 'status' => 'required|boolean',
             ],
         );
 
         $this->unsetModel();
-
-        $this->reset($this->varDealer);
+        $this->modal = false;
     }
 
     public function delete(): void
     {
-        $this->setModel(new Dealer());
+        $this->setModel(new Product());
 
         foreach ($this->selected as $id) {
             $this->setRecordId($id);
             $this->deleteData();
         }
 
-        $this->unsetModel();
         $this->unsetRecordId();
-        $this->selected = [];
+        $this->unsetModel();
     }
 
     public function datas(): LengthAwarePaginator
     {
-        return Dealer::query()
+        return Product::query()
             ->where('code', 'like', "%{$this->search}%")
-            ->orWhere('name', 'like', "%{$this->search}%")
-            ->orWhere('address', 'like', "%{$this->search}%")
-            ->orWhere('phone', 'like', "%{$this->search}%")
+            ->orWhere('description', 'like', "%{$this->search}%")
             ->orderBy($this->sortBy['column'], $this->sortBy['direction'])
             ->paginate($this->perPage);
     }
-
 
     public function headers(): array
     {
         return [
             ['key' => 'code', 'label' => 'Kode'],
-            ['key' => 'name', 'label' => 'Nama'],
-            ['key' => 'address', 'label' => 'Alamat'],
-            ['key' => 'phone', 'label' => 'Telepon'],
-            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'description', 'label' => 'Deskripsi'],
             ['key' => 'created_at', 'label' => 'Dibuat', 'class' => 'w-64'],
         ];
     }
@@ -100,9 +88,7 @@ class extends Component {
         $js('create', () => {
             $wire.recordId = null;
             $wire.code = '';
-            $wire.name = '';
-            $wire.address = '';
-            $wire.phone = '';
+            $wire.description = '';
             $wire.status = true;
             $wire.modal = true;
         })
@@ -110,9 +96,7 @@ class extends Component {
         $js('edit', (data) => {
             $wire.recordId = data.id;
             $wire.code = data.code;
-            $wire.name = data.name;
-            $wire.address = data.address;
-            $wire.phone = data.phone;
+            $wire.description = data.description;
             $wire.status = data.status;
             $wire.modal = true;
         })
@@ -121,7 +105,7 @@ class extends Component {
 
 <div>
     <!-- HEADER -->
-    <x-header title="Dealers" separator>
+    <x-header title="Products" separator>
         <x-slot:actions>
             <x-button label="Create" @click="$js.create" responsive icon="fas.plus" />
         </x-slot:actions>
@@ -154,7 +138,7 @@ class extends Component {
         @endif
     </x-card>
 
-    <x-modal wire:model="modal" title="Form Dealer" box-class="w-full h-fit max-w-[600px]" without-trap-focus>
+    <x-modal wire:model="modal" title="Form Product" box-class="w-full h-fit max-w-[600px]" without-trap-focus>
         <x-form wire:submit="save" no-separator>
 
             <div>
@@ -162,19 +146,11 @@ class extends Component {
             </div>
 
             <div>
-                <x-input label="Name" wire:model="name" required />
-            </div>
-            
-            <div>
-                <x-textarea label="Alamat" wire:model="address" />
+                <x-input label="Deskripsi" wire:model="description" required />
             </div>
 
             <div>
-                <x-input label="Telepon" type="number" wire:model="phone" />
-            </div>
-
-            <div>
-            <x-toggle label="Status" wire:model="status" right />
+                <x-toggle label="Status" wire:model="status" right />
             </div>
 
             <x-slot:actions>
