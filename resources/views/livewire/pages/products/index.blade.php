@@ -7,6 +7,7 @@ use Livewire\Volt\Component;
 use Livewire\WithPagination;
 use App\Imports\DealerImport;
 use Livewire\WithFileUploads;
+use App\Imports\ProductImport;
 use App\Traits\CreateOrUpdate;
 use Livewire\Attributes\Title;
 use Illuminate\Http\UploadedFile;
@@ -22,6 +23,7 @@ class extends Component {
     public string $search = '';
 
     public bool $modal = false;
+    public bool $upload = false;
 
     public int $perPage = 10;
     public array $selected = [];
@@ -36,7 +38,7 @@ class extends Component {
 
     public function downloadTemplate()
     {
-        $file = public_path('templates/template-dealer.xlsx');
+        $file = public_path('templates/template-product.xlsx');
 
         if (!file_exists($file)) {
             $this->error('File tidak ditemukan', position: 'toast-bottom');
@@ -53,7 +55,7 @@ class extends Component {
         ]);
 
         try {
-            Excel::import(new DealerImport(), $this->file);
+            Excel::import(new ProductImport(), $this->file);
 
             $this->upload = false;
             $this->reset('file');
@@ -153,6 +155,10 @@ class extends Component {
             $wire.status = data.status;
             $wire.modal = true;
         })
+
+        $js('upload', () => {
+            $wire.upload = true;
+        })
     </script>
 @endscript
 
@@ -160,6 +166,7 @@ class extends Component {
     <!-- HEADER -->
     <x-header title="Products" separator>
         <x-slot:actions>
+            <x-button label="Upload" @click="$js.upload" responsive icon="fas.upload" />
             <x-button label="Create" @click="$js.create" responsive icon="fas.plus" />
         </x-slot:actions>
     </x-header>
@@ -211,4 +218,6 @@ class extends Component {
             </x-slot:actions>
         </x-form>
     </x-modal>
+
+    @include('livewire.modals.modal-upload');
 </div>
