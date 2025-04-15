@@ -5,14 +5,19 @@ use App\Models\Product;
 use App\Traits\LogFormatter;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use App\Imports\DealerImport;
+use Livewire\WithFileUploads;
 use App\Traits\CreateOrUpdate;
 use Livewire\Attributes\Title;
+use Illuminate\Http\UploadedFile;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 new
 #[Title('Products')]
 class extends Component {
-    use Toast, LogFormatter, WithPagination, CreateOrUpdate;
+    use Toast, LogFormatter, WithPagination, CreateOrUpdate, WithFileUploads;
 
     public string $search = '';
 
@@ -21,11 +26,59 @@ class extends Component {
     public int $perPage = 10;
     public array $selected = [];
     public array $sortBy = ['column' => 'created_at', 'direction' => 'desc'];
+    public ?UploadedFile $file = null;
+    
 
     public string $code = '';
     public string $description = '';
     public bool $status = true;
     public array $varProduct = ['recordId', 'code', 'description', 'status'];
+
+    public function downloadTemplate()
+    {
+        $file = public_path('templates/template-dealer.xlsx');
+
+        if (!file_exists($file)) {
+            $this->error('File tidak ditemukan', position: 'toast-bottom');
+            return;
+        }
+
+        return Response::download($file);
+    }
+
+    public function import(): void
+    {
+        $this->validate([
+            'file' => 'required|mimes:xlsx',
+        ]);
+
+        try {
+            Excel::import(new DealerImport(), $this->file);
+
+            $this->upload = false;
+            $this->reset('file');
+            $this->success('Data berhasil diupload', position: 'toast-bottom');
+        } catch (\Exception $e) {
+            $this->error('Data gagal diupload', position: 'toast-bottom');
+            Log::channel('debug')->error("message: {$e->getMessage()}  file: {$e->getFile()}  line: {$e->getLine()}");
+        }
+    }
+
+    public function export()
+    {
+        $datas = Brand::all();
+        $datas = $datas->map(function ($brand) {
+            return [
+                'code' => $brand->code,
+                'name' => $brand->name,
+                'created_at' => $brand->created_at->format('Y-m-d'),
+            ];
+        });
+
+        $headers = ['KODE', 'NAMA', 'DIBUAT PADA'];
+
+        return Excel::download(new ExportDatas($datas, 'Data Brand', $headers), 'brand_' . date('Y-m-d') . '.xlsx');
+    }
 
     public function save(): void
     {
