@@ -182,6 +182,9 @@ new #[Title('Users')] class extends Component {
                         class="btn-ghost btn-sm text-primary" />
                 </div>
             @endscope
+            <x-slot:empty>
+                <x-icon name="o-cube" label="It is empty." />
+            </x-slot:empty>
         </x-table>
 
         @if ($selected)

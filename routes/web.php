@@ -21,6 +21,10 @@ Route::group(['middleware' => 'auth'], function () {
 
     Volt::route('/products', 'pages.products.index')->middleware('can:manage-products')->name('products');
 
+    Volt::route('/budget-period', 'pages.budget-period.index')->middleware('can:manage-budget-period')->name('budget-period');
+
+    Volt::route('/budget-period/form', 'pages.budget-period.create')->middleware('can:manage-budget-period-create')->name('budget-period-create');
+
     Volt::route('/users', 'pages.users.index')->middleware('can:manage-users')->name('users');
 
     Volt::route('/roles', 'settings.roles.index')->middleware('can:manage-roles')->name('roles');

@@ -24,7 +24,7 @@ new #[Title('Permissions')] class extends Component {
     public function save(): void
     {
         $input = $this->validate([
-            'name' => 'required|string|max:50',
+            'name' => 'required|string|max:50|unique:permissions,name,' . ($this->id ?? 'NULL'),
         ]);
 
         try {

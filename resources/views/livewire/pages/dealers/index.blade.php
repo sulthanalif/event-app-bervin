@@ -82,7 +82,7 @@ class extends Component {
         return Excel::download(new ExportDatas($datas, 'Data Brand', $headers), 'brand_' . date('Y-m-d') . '.xlsx');
     }
 
-    public function save(): void 
+    public function save(): void
     {
         $this->setModel(new Dealer());
         $this->saveOrUpdate(
@@ -202,6 +202,9 @@ class extends Component {
                         class="btn-ghost btn-sm text-primary" />
                 </div>
             @endscope
+            <x-slot:empty>
+                <x-icon name="o-cube" label="It is empty." />
+            </x-slot:empty>
         </x-table>
 
         @if ($selected)
@@ -222,7 +225,7 @@ class extends Component {
             <div>
                 <x-input label="Name" wire:model="name" required />
             </div>
-            
+
             <div>
                 <x-textarea label="Alamat" wire:model="address" />
             </div>
@@ -236,10 +239,10 @@ class extends Component {
             </div>
 
             <x-slot:actions>
-                <x-button label="save" type="submit" spinner="save" class="btn-primary" />
+                <x-button label="Save" type="submit" spinner="save" class="btn-primary" />
             </x-slot:actions>
         </x-form>
     </x-modal>
 
-    @include('livewire.modals.modal-upload');
+    @include('livewire.modals.modal-upload')
 </div>

@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
 
             'manage-dealers',
             'manage-products',
+            'manage-budget-period',
+            'manage-budget-period-create',
         ];
 
         foreach ($permissions as $permission) {
@@ -43,5 +45,11 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $superAdmin->assignRole($roleSuperAdmin);
+
+
+        $this->call([
+            ImportSeeder::class,
+        ]);
+
     }
 }

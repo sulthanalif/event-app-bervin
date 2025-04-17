@@ -29,7 +29,7 @@ class extends Component {
     public array $selected = [];
     public array $sortBy = ['column' => 'created_at', 'direction' => 'desc'];
     public ?UploadedFile $file = null;
-    
+
 
     public string $code = '';
     public string $description = '';
@@ -188,6 +188,9 @@ class extends Component {
                         class="btn-ghost btn-sm text-primary" />
                 </div>
             @endscope
+            <x-slot:empty>
+                <x-icon name="o-cube" label="It is empty." />
+            </x-slot:empty>
         </x-table>
 
         @if ($selected)
@@ -214,10 +217,10 @@ class extends Component {
             </div>
 
             <x-slot:actions>
-                <x-button label="save" type="submit" spinner="save" class="btn-primary" />
+                <x-button label="Save" type="submit" spinner="save" class="btn-primary" />
             </x-slot:actions>
         </x-form>
     </x-modal>
 
-    @include('livewire.modals.modal-upload');
+    @include('livewire.modals.modal-upload')
 </div>
