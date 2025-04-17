@@ -14,6 +14,10 @@
     <x-menu-item title="Budget Period" icon="fas.money-bill-wave" link="{{ route('budget-period') }}" />
 @endcan
 
+@can('manage-special-voucher')
+    <x-menu-item title="Special Voucher" icon="fas.ticket" link="{{ route('special-voucher') }}" />
+@endcan
+
 @can('manage-users')
     <x-menu-item title="Users" icon="fas.users" link="{{ route('users') }}" />
 @endcan

@@ -1,5 +1,5 @@
 {{--  modal --}}
-<x-modal title="Upload File" wire:model="upload" box-class="w-12/12 md:w-8/12 lg:w-6/12 xl:w-4/12">
+<x-modal title="Upload File" wire:model="upload" box-class="w-12/12 md:w-8/12 lg:w-6/12 xl:w-4/12" without-trap-focus>
     <x-form wire:submit="import" class="relative" separator>
         <div class="flex justify-center items-center pt-5">
             <x-file wire:model="file" hint="Hanya File Excel" accept=".xlsx" required />

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('end_date');
             $table->boolean('is_claimed')->default(false);
             $table->boolean('is_locked')->default(false);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
