@@ -22,6 +22,7 @@ class Voucher extends Model
 
         static::creating(function ($model) {
             $model->code = self::generateCode(10);
+            $model->ordinal = Voucher::where('budget_period_id', $model->budget_period_id)->max('ordinal') + 1;
         });
     }
 

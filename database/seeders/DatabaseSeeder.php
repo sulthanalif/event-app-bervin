@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             'manage-budget-period-create',
             'manage-special-voucher',
             'manage-voucher',
+            'manage-special-voucher-form',
         ];
 
         foreach ($permissions as $permission) {

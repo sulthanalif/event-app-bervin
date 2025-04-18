@@ -1,6 +1,7 @@
 <?php
 
 use Mary\Traits\Toast;
+use App\Models\Product;
 use App\Traits\LogFormatter;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -8,6 +9,8 @@ use Livewire\WithFileUploads;
 use App\Models\SpecialVoucher;
 use App\Traits\CreateOrUpdate;
 use Livewire\Attributes\Title;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 new #[Title('Special Voucher')] class extends Component {
@@ -22,6 +25,71 @@ new #[Title('Special Voucher')] class extends Component {
     public array $selected = [];
     public array $sortBy = ['column' => 'created_at', 'direction' => 'desc'];
     public ?UploadedFile $file = null;
+
+    public ?int $id = null;
+    public ?int $product_searchable_id = null;
+    public string $start_date = '';
+    public string $end_date = '';
+    public float $amount = 0;
+    public bool $status = true;
+    public array $varSpecialVoucher = ['id', 'product_searchable_id', 'start_date', 'end_date', 'amount', 'status'];
+
+    public Collection $productsSearchable;
+
+    public function mount(): void
+    {
+        $this->searchProduct();
+    }
+
+    public function searchProduct(string $value = '')
+    {
+        $selectedOption = Product::where('id', $this->product_searchable_id)->get();
+
+        $this->productsSearchable = Product::query()
+            ->where('description', 'like', "%{$value}%")
+            ->orWhere('code', 'like', "%{$value}%")
+            ->orderBy('description')
+            ->get()
+            ->merge($selectedOption);
+    }
+
+    public function create(): void
+    {
+        $this->redirect(route('special-voucher-form'), navigate: true);
+    }
+
+    public function save(): void
+    {
+        $this->validate([
+            'product_searchable_id' => 'required',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'amount' => 'required|numeric|min:0',
+            'status' => 'required|boolean',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            SpecialVoucher::updateOrCreate(['id' => $this->id], [
+                'product_id' => $this->product_searchable_id,
+                'start_date' => $this->start_date,
+                'end_date' => $this->end_date,
+                'amount' => $this->amount,
+                'status' => $this->status,
+            ]);
+
+            DB::commit();
+
+            $this->success('Special Voucher Berhasil Disimpan.', position: 'toast-bottom');
+            $this->reset($this->varSpecialVoucher);
+            $this->modal = false;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->error('Special Voucher Gagal Disimpan.', position: 'toast-bottom');
+            $this->logError('debug', 'Gagal Save Special Voucher.', $e);
+        }
+    }
 
     public function datas(): LengthAwarePaginator
     {
@@ -42,7 +110,7 @@ new #[Title('Special Voucher')] class extends Component {
             ['key' => 'product.description', 'label' => 'Product', 'sortBy' => 'product_description'],
             ['key' => 'start_date', 'label' => 'Tanggal Mulai'],
             ['key' => 'end_date', 'label' => 'Tanggal Selesai'],
-            ['key' => 'budget', 'label' => 'Budget'],
+            ['key' => 'amount', 'label' => 'Nominal'],
             ['key' => 'status', 'label' => 'Status'],
             ['key' => 'created_at', 'label' => 'Dibuat'],
         ];
@@ -65,6 +133,15 @@ new #[Title('Special Voucher')] class extends Component {
             $wire.file = null;
             $wire.upload = true;
         })
+        $js('create', () => {
+            $wire.id = null;
+            $wire.product_searchable_id = null;
+            $wire.start_date = '';
+            $wire.end_date = '';
+            $wire.amount = 0;
+            $wire.status = true;
+            $wire.modal = true;
+        })
     </script>
 @endscript
 
@@ -73,7 +150,7 @@ new #[Title('Special Voucher')] class extends Component {
     <x-header title="Special Voucher" separator>
         <x-slot:actions>
             <x-button label="Upload" @click="$js.upload" responsive icon="fas.upload" />
-            <x-button label="Create" @click="$js.create" responsive icon="fas.plus" />
+            <x-button label="Create" @click="$js.create" responsive icon="fas.plus"  />
         </x-slot:actions>
     </x-header>
 
@@ -85,6 +162,15 @@ new #[Title('Special Voucher')] class extends Component {
     <x-card class="mt-4" shadow>
         <x-table :headers="$headers" :rows="$datas" :sort-by="$sortBy" per-page="perPage" :per-page-values="[10, 25, 50, 100]"
             wire:model.live="selected" selectable with-pagination>
+            @scope('cell_start_date', $data)
+                <p>{{ \Carbon\Carbon::parse($data->start_date)->locale('id_ID')->isoFormat('D MMMM Y') }}</p>
+            @endscope
+            @scope('cell_end_date', $data)
+                <p>{{ \Carbon\Carbon::parse($data->end_date)->locale('id_ID')->isoFormat('D MMMM Y') }}</p>
+            @endscope
+            @scope('cell_amount', $data)
+                <p>Rp. {{ number_format($data->amount, 0, ',', '.') }}</p>
+            @endscope
             @scope('cell_status', $data)
                 <p>{{ $data->status ? 'Aktif' : 'Tidak Aktif' }}</p>
             @endscope
@@ -111,23 +197,46 @@ new #[Title('Special Voucher')] class extends Component {
         <x-form wire:submit="save" no-separator>
 
             <div>
-                <x-input label="Kode" wire:model="code" required />
+                <x-choices-offline
+                    label="Product"
+                    wire:model="product_searchable_id"
+                    :options="$productsSearchable"
+                    placeholder="Pilih Product ..."
+                    search-function="searchProduct"
+                    single
+                    clearable
+                    no-result-text="Ops! Nothing here ..."
+                    searchable >
+                    @scope('item', $product)
+                        <x-list-item :item="$product" value="description" sub-value="code" />
+                    @endscope
+
+                    {{-- Selection slot--}}
+                    @scope('selection', $product)
+                        {{ $product->description }} ({{ $product->code }})
+                    @endscope
+                </x-choices-offline>
+                </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <x-datepicker label="Tanggal Mulai" wire:model="start_date" icon="o-calendar" @change="$wire.$refresh()" :config="[
+                        'minDate' => now()->toDateString(),
+                    ]" />
+                </div>
+                <div>
+                    <x-datepicker label="Tanggal Berakhir" wire:model="end_date" icon="o-calendar" :config="[
+                    'minDate' => $start_date,
+                    ]" />
+                </div>
             </div>
 
             <div>
-                <x-input label="Name" wire:model="name" required />
+                <x-input label="Nominal" wire:model="amount" prefix="Rp" locale="pt-ID" money />
             </div>
 
             <div>
-                <x-textarea label="Alamat" wire:model="address" />
-            </div>
-
-            <div>
-                <x-input label="Telepon" type="number" wire:model="phone" />
-            </div>
-
-            <div>
-            <x-toggle label="Status" wire:model="status" right />
+                <x-toggle label="Status" wire:model="status" />
             </div>
 
             <x-slot:actions>

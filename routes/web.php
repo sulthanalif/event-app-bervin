@@ -27,6 +27,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Volt::route('/special-voucher', 'pages.special-voucher.index')->middleware('can:manage-special-voucher')->name('special-voucher');
 
+    Volt::route('/special-voucher/form', 'pages.special-voucher.form')->middleware('can:manage-special-voucher-form')->name('special-voucher-form');
+
     Volt::route('/users', 'pages.users.index')->middleware('can:manage-users')->name('users');
 
     Volt::route('/roles', 'settings.roles.index')->middleware('can:manage-roles')->name('roles');
