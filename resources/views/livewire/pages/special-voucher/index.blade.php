@@ -30,7 +30,7 @@ new #[Title('Special Voucher')] class extends Component {
     public ?int $product_searchable_id = null;
     public string $start_date = '';
     public string $end_date = '';
-    public float $amount = 0;
+    public int $amount = 0;
     public bool $status = true;
     public array $varSpecialVoucher = ['id', 'product_searchable_id', 'start_date', 'end_date', 'amount', 'status'];
 
@@ -124,6 +124,17 @@ new #[Title('Special Voucher')] class extends Component {
         ];
     }
 
+    // public function edit(SpecialVoucher $specialVoucher): void
+    // {
+    //     $this->id = $specialVoucher->id;
+    //     $this->product_searchable_id = $specialVoucher->product_id;
+    //     $this->start_date = $specialVoucher->start_date;
+    //     $this->end_date = $specialVoucher->end_date;
+    //     $this->amount = $specialVoucher->amount;
+    //     $this->status = $specialVoucher->status;
+    //     $this->modal = true;
+    //     $this->resetPage();
+    // }
 
 }; ?>
 
@@ -141,6 +152,18 @@ new #[Title('Special Voucher')] class extends Component {
             $wire.amount = 0;
             $wire.status = true;
             $wire.modal = true;
+            $wire.$refresh();
+        })
+        $js('edit', (data) => {
+            // console.log(data);
+            $wire.id = data.id;
+            $wire.product_searchable_id = data.product_id;
+            $wire.start_date = data.start_date;
+            $wire.end_date = data.end_date;
+            $wire.amount = data.amount;
+            $wire.status = data.status;
+            $wire.modal = true;
+            $wire.$refresh();
         })
     </script>
 @endscript
@@ -161,7 +184,7 @@ new #[Title('Special Voucher')] class extends Component {
     <!-- TABLE  -->
     <x-card class="mt-4" shadow>
         <x-table :headers="$headers" :rows="$datas" :sort-by="$sortBy" per-page="perPage" :per-page-values="[10, 25, 50, 100]"
-            wire:model.live="selected" selectable with-pagination>
+            wire:model.live="selected" selectable with-pagination @row-click="$js.edit($event.detail)">
             @scope('cell_start_date', $data)
                 <p>{{ \Carbon\Carbon::parse($data->start_date)->locale('id_ID')->isoFormat('D MMMM Y') }}</p>
             @endscope
@@ -174,12 +197,12 @@ new #[Title('Special Voucher')] class extends Component {
             @scope('cell_status', $data)
                 <p>{{ $data->status ? 'Aktif' : 'Tidak Aktif' }}</p>
             @endscope
-            @scope('actions', $data)
+            {{-- @scope('actions', $data)
                 <div class="flex gap-2">
                     <x-button icon="fas.pencil" @click="$js.edit({{ $data }})"
                         class="btn-ghost btn-sm text-primary" />
                 </div>
-            @endscope
+            @endscope --}}
             <x-slot:empty>
                 <x-icon name="o-cube" label="It is empty." />
             </x-slot:empty>
@@ -220,14 +243,10 @@ new #[Title('Special Voucher')] class extends Component {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <x-datepicker label="Tanggal Mulai" wire:model="start_date" icon="o-calendar" @change="$wire.$refresh()" :config="[
-                        'minDate' => now()->toDateString(),
-                    ]" />
+                    <x-datepicker label="Tanggal Mulai" wire:model="start_date" icon="o-calendar" @change="$wire.$refresh()" />
                 </div>
                 <div>
-                    <x-datepicker label="Tanggal Berakhir" wire:model="end_date" icon="o-calendar" :config="[
-                    'minDate' => $start_date,
-                    ]" />
+                    <x-datepicker label="Tanggal Berakhir" wire:model="end_date" icon="o-calendar" />
                 </div>
             </div>
 

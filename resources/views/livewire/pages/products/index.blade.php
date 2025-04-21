@@ -11,6 +11,7 @@ use App\Imports\ProductImport;
 use App\Traits\CreateOrUpdate;
 use Livewire\Attributes\Title;
 use Illuminate\Http\UploadedFile;
+use Livewire\WithoutUrlPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,7 +19,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 new
 #[Title('Products')]
 class extends Component {
-    use Toast, LogFormatter, WithPagination, CreateOrUpdate, WithFileUploads;
+    use Toast, LogFormatter, WithPagination, CreateOrUpdate, WithFileUploads, WithoutUrlPagination;
 
     public string $search = '';
 
@@ -178,16 +179,16 @@ class extends Component {
     <!-- TABLE  -->
     <x-card class="mt-4" shadow>
         <x-table :headers="$headers" :rows="$datas" :sort-by="$sortBy" per-page="perPage" :per-page-values="[10, 25, 50, 100]"
-            wire:model.live="selected" selectable with-pagination>
+            wire:model.live="selected" selectable with-pagination @row-click="$js.edit($event.detail)">
             @scope('cell_status', $data)
                 <p>{{ $data->status ? 'Aktif' : 'Tidak Aktif' }}</p>
             @endscope
-            @scope('actions', $data)
+            {{-- @scope('actions', $data)
                 <div class="flex gap-2">
                     <x-button icon="fas.pencil" @click="$js.edit({{ $data }})"
                         class="btn-ghost btn-sm text-primary" />
                 </div>
-            @endscope
+            @endscope --}}
             <x-slot:empty>
                 <x-icon name="o-cube" label="It is empty." />
             </x-slot:empty>

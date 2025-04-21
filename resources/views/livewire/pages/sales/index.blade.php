@@ -3,14 +3,17 @@
 use App\Models\Sales;
 use App\Models\Dealer;
 use Mary\Traits\Toast;
+use App\Imports\SalesImport;
 use App\Traits\LogFormatter;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Excel;
 use Livewire\WithFileUploads;
 use App\Traits\CreateOrUpdate;
 use Livewire\Attributes\Title;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 new #[Title('Sales')] class extends Component {
@@ -49,6 +52,52 @@ new #[Title('Sales')] class extends Component {
             ->orderBy('name')
             ->get()
             ->merge($selectedOption);
+    }
+
+    public function downloadTemplate()
+    {
+        $file = public_path('templates/template-sales.xlsx');
+
+        if (!file_exists($file)) {
+            $this->error('File tidak ditemukan', position: 'toast-bottom');
+            return;
+        }
+
+        return Response::download($file);
+    }
+
+    public function import(): void
+    {
+        $this->validate([
+            'file' => 'required|mimes:xlsx',
+        ]);
+
+        try {
+            Excel::import(new SalesImport(), $this->file);
+
+            $this->upload = false;
+            $this->reset('file');
+            $this->success('Data berhasil diupload', position: 'toast-bottom');
+        } catch (\Exception $e) {
+            $this->error('Data gagal diupload', position: 'toast-bottom');
+            Log::channel('debug')->error("message: {$e->getMessage()}  file: {$e->getFile()}  line: {$e->getLine()}");
+        }
+    }
+
+    public function export()
+    {
+        $datas = Brand::all();
+        $datas = $datas->map(function ($brand) {
+            return [
+                'code' => $brand->code,
+                'name' => $brand->name,
+                'created_at' => $brand->created_at->format('Y-m-d'),
+            ];
+        });
+
+        $headers = ['KODE', 'NAMA', 'DIBUAT PADA'];
+
+        return Excel::download(new ExportDatas($datas, 'Data Brand', $headers), 'brand_' . date('Y-m-d') . '.xlsx');
     }
 
     public function save(): void
@@ -138,16 +187,16 @@ new #[Title('Sales')] class extends Component {
     <!-- TABLE  -->
     <x-card class="mt-4" shadow>
         <x-table :headers="$headers" :rows="$datas" :sort-by="$sortBy" per-page="perPage" :per-page-values="[10, 25, 50, 100]"
-            wire:model.live="selected" selectable with-pagination>
+            wire:model.live="selected" selectable with-pagination @row-click="$js.edit($event.detail)">
             @scope('cell_status', $data)
                 <p>{{ $data->status ? 'Aktif' : 'Tidak Aktif' }}</p>
             @endscope
-            @scope('actions', $data)
+            {{-- @scope('actions', $data)
                 <div class="flex gap-2">
                     <x-button icon="fas.pencil" @click="$js.edit({{ $data }})"
                         class="btn-ghost btn-sm text-primary" />
                 </div>
-            @endscope
+            @endscope --}}
             <x-slot:empty>
                 <x-icon name="o-cube" label="It is empty." />
             </x-slot:empty>
@@ -182,7 +231,8 @@ new #[Title('Sales')] class extends Component {
                     single
                     clearable
                     no-result-text="Ops! Nothing here ..."
-                    searchable />
+                    searchable
+                    required />
             </div>
 
             <div class="mt-5">

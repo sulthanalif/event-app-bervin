@@ -111,7 +111,7 @@ new #[Title('Budget Period')] class extends Component {
     <!-- TABLE  -->
     <x-card class="mt-4" shadow>
         <x-table :headers="$headers" :rows="$datas" :sort-by="$sortBy" per-page="perPage" :per-page-values="[10, 25, 50, 100]"
-            wire:model.live="selected" selectable with-pagination>
+            wire:model.live="selected" selectable with-pagination @row-click="$wire.edit($event.detail.id)">
             @scope('cell_start_date', $data)
                 <p>{{ \Carbon\Carbon::parse($data->start_date)->locale('id_ID')->isoFormat('D MMMM Y') }}</p>
             @endscope
@@ -124,12 +124,12 @@ new #[Title('Budget Period')] class extends Component {
             @scope('cell_status', $data)
                 <p>{{ $data->status ? 'Aktif' : 'Tidak Aktif' }}</p>
             @endscope
-            @scope('actions', $data)
+            {{-- @scope('actions', $data)
                 <div class="flex gap-2">
                     <x-button icon="fas.pencil" @click="$wire.edit({{ $data->id }})"
                         class="btn-ghost btn-sm text-primary" spinner="edit({{ $data->id }})" />
                 </div>
-            @endscope
+            @endscope --}}
             <x-slot:empty>
                 <x-icon name="o-cube" label="It is empty." />
             </x-slot:empty>
