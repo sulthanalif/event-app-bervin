@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vouchers', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('budget_period_id')->constrained()->onDelete('cascade');
             $table->integer('ordinal');
             $table->string('code')->unique();

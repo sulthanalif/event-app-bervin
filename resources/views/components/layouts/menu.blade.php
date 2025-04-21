@@ -18,6 +18,10 @@
     <x-menu-item title="Special Voucher" icon="fas.ticket" link="{{ route('special-voucher') }}" />
 @endcan
 
+@can('manage-sales')
+    <x-menu-item title="Sales" icon="fas.users" link="{{ route('sales') }}" />
+@endcan
+
 @can('manage-users')
     <x-menu-item title="Users" icon="fas.users" link="{{ route('users') }}" />
 @endcan

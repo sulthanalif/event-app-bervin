@@ -11,20 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dealers', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
-            $table->string('address')->nullable();
-            $table->string('phone')->nullable();
             $table->boolean('status')->default(true);
-            $table->softDeletes();
+            $table->foreignId('dealer_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-        });
-
-        Schema::create('user_dealer', function (Blueprint $table) {
-            $table->foreignIdFor(\App\Models\User::class)->constrained();
-            $table->foreignIdFor(\App\Models\Dealer::class)->constrained();
         });
     }
 
@@ -33,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dealers');
+        Schema::dropIfExists('sales');
     }
 };

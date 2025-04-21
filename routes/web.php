@@ -19,6 +19,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Volt::route('/dealers', 'pages.dealers.index')->middleware('can:manage-dealers')->name('dealers');
 
+    Volt::route('/sales', 'pages.sales.index')->middleware('can:manage-sales')->name('sales');
+
     Volt::route('/products', 'pages.products.index')->middleware('can:manage-products')->name('products');
 
     Volt::route('/budget-period', 'pages.budget-period.index')->middleware('can:manage-budget-period')->name('budget-period');

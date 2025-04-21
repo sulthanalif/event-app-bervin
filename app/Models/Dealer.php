@@ -18,4 +18,23 @@ class Dealer extends Model
         'phone',
         'status',
     ];
+
+    public function sales()
+    {
+        return $this->hasMany(Sales::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_dealer')
+            ->where('status', true)
+            ->whereHas('roles', function ($query) {
+                $query->where('name', '=', 'bse');
+            });
+    }
+
+    public function budgetPeriod()
+    {
+        return $this->hasMany(BudgetPeriod::class);
+    }
 }

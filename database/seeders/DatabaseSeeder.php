@@ -16,9 +16,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $roleSuperAdmin = Role::create(['name' => 'super-admin']);
+        $roleAdmin = Role::create(['name' => 'admin']);
+        $roleBse = Role::create(['name' => 'bse']);
 
 
         $permissions = [
+            'roulette',
             'dashboard',
             'manage-users',
             'settings',
@@ -33,6 +36,8 @@ class DatabaseSeeder extends Seeder
             'manage-special-voucher',
             'manage-voucher',
             'manage-special-voucher-form',
+            'manage-sellout',
+            'manage-sales',
         ];
 
         foreach ($permissions as $permission) {
@@ -40,6 +45,23 @@ class DatabaseSeeder extends Seeder
         }
 
         $roleSuperAdmin->givePermissionTo($permissions);
+        $roleAdmin->givePermissionTo([
+            'roulette',
+            'dashboard',
+
+            'manage-dealers',
+            'manage-products',
+            'manage-budget-period',
+            'manage-budget-period-create',
+            'manage-special-voucher',
+            'manage-voucher',
+            'manage-special-voucher-form',
+            'manage-sellout',
+            'manage-sales',
+        ]);
+        $roleBse->givePermissionTo([
+            'roulette',
+        ]);
 
         $superAdmin = User::factory()->create([
             'name' => 'IT BERVIN',
@@ -48,6 +70,22 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $superAdmin->assignRole($roleSuperAdmin);
+
+        $admin = User::factory()->create([
+            'name' => 'admin',
+            'email' => 'admin@bervin.co.id',
+            'password' => 'Bervin123',
+        ]);
+
+        $admin->assignRole($roleAdmin);
+
+        $bse = User::factory()->create([
+            'name' => 'bse',
+            'email' => 'bse@bervin.co.id',
+            'password' => 'Bervin123',
+        ]);
+
+        $bse->assignRole($roleBse);
 
 
         $this->call([
